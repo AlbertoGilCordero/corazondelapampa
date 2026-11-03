@@ -592,6 +592,26 @@ html.ev-visor-on{overflow:hidden}
   .esc-brasas circle,.esc-humo path,.esc-llamas path,.esc-chispas circle,.esc-charla circle,.esc-mas rect{animation:none}
   .esc-humo path{opacity:.35} .esc-capa,.ev-burbuja{transition:none}
 }
+
+/* ═════════ Cierre de inscripción: cuenta atrás grande ═════════ */
+.ev-plazo{padding-block:clamp(2.2rem, 1.6rem + 3vw, 4rem);border-top:1px solid var(--linea);
+  background:radial-gradient(50% 120% at 50% 100%, color-mix(in srgb, var(--brasa) 12%, transparent), transparent 70%)}
+.ev-plazo-in{display:flex;flex-direction:column;align-items:center;text-align:center;gap:clamp(1.2rem, 1rem + 1vw, 2rem)}
+.ev-plazo-cab{display:flex;flex-direction:column;align-items:center;gap:.5rem}
+.ev-plazo-fecha{color:var(--ceniza);font-size:.95rem}
+.ev-reloj{display:grid;grid-template-columns:repeat(4, minmax(0,1fr));width:100%;max-width:880px}
+.ev-reloj-u{display:flex;flex-direction:column;align-items:center;gap:.5rem;padding-inline:.4rem;min-width:0;position:relative}
+.ev-reloj-u + .ev-reloj-u::before{content:"";position:absolute;left:0;top:12%;height:62%;width:1px;background:color-mix(in srgb, var(--hueso) 12%, transparent)}
+.ev-reloj-n{font-size:clamp(3rem, 1.6rem + 7vw, 7.5rem);font-weight:200;line-height:.95;letter-spacing:-.04em;color:var(--hueso);
+  font-variant-numeric:tabular-nums;text-shadow:0 0 40px color-mix(in srgb, var(--brasa) 30%, transparent)}
+.ev-reloj-u:last-child .ev-reloj-n{color:var(--cobre)}
+.ev-reloj-n.is-cambia{animation:ev-reloj-pulso .6s var(--ease)}
+@keyframes ev-reloj-pulso{0%{opacity:.4;transform:translateY(-4px)}100%{opacity:1;transform:none}}
+.ev-reloj-l{font-size:var(--fs-label);font-weight:500;letter-spacing:var(--ls-label);text-transform:uppercase;color:var(--ceniza)}
+.ev-plazo.is-cerrada .ev-reloj{opacity:.35}
+.ev-plazo.is-cerrada .ev-plazo-cab .cd-etiqueta{color:var(--brasa)}
+.cd-btn.is-cerrado{opacity:.45;pointer-events:none;cursor:default}
+@media (prefers-reduced-motion:reduce){ .ev-reloj-n.is-cambia{animation:none} }
 </style>
 <!-- locked -->
 <style>
@@ -646,6 +666,7 @@ html:not(.cd-listo) #in-bloqueo{opacity:0;visibility:hidden}
   "horaLlegada": "12:00",
   "plazas": 50,
   "plazasLibres": 50,
+  "inscripcionHasta": "2026-11-09T09:00:00+01:00",
   "plazasHoja": {"id": "10VFl2ftaFuARQ8GejXBzcoCx7lQlPhAEbgOoMHrTnkY", "pestana": "Hoja 1", "celda": "A2"},
   "precio": 16,
   "moneda": "EUR",
@@ -925,6 +946,22 @@ html:not(.cd-listo) #in-bloqueo{opacity:0;visibility:hidden}
           </a>
         </div>
       </div>
+    </div>
+  </section>
+
+  <section class="ev-plazo cd-gutter" id="ev-plazo" aria-labelledby="ev-plazo-t" hidden>
+    <div class="cd-wrap ev-plazo-in cd-reveal">
+      <div class="ev-plazo-cab">
+        <p class="cd-etiqueta" id="ev-plazo-t">Registration closes in</p>
+        <p class="ev-plazo-fecha" id="ev-plazo-fecha"></p>
+      </div>
+      <div class="ev-reloj" id="ev-reloj" role="timer" aria-live="off">
+        <div class="ev-reloj-u"><span class="ev-reloj-n cd-num" id="ev-r-d">00</span><span class="ev-reloj-l">days</span></div>
+        <div class="ev-reloj-u"><span class="ev-reloj-n cd-num" id="ev-r-h">00</span><span class="ev-reloj-l">hours</span></div>
+        <div class="ev-reloj-u"><span class="ev-reloj-n cd-num" id="ev-r-m">00</span><span class="ev-reloj-l">minutes</span></div>
+        <div class="ev-reloj-u"><span class="ev-reloj-n cd-num" id="ev-r-s">00</span><span class="ev-reloj-l">seconds</span></div>
+      </div>
+      <a class="cd-btn ev-plazo-btn" id="ev-plazo-btn" href="#ev-pago">Pay your spot</a>
     </div>
   </section>
 
@@ -1746,6 +1783,36 @@ html:not(.cd-listo) #in-bloqueo{opacity:0;visibility:hidden}
     });
   }
 
+  // ── Cierre de inscripción: cuenta atrás grande hasta ev.inscripcionHasta ──
+  (function(){
+    var hasta = ev.inscripcionHasta ? new Date(ev.inscripcionHasta) : null;
+    if (!hasta || isNaN(hasta)) return;
+    var sec = $('ev-plazo'); sec.hidden = false;
+    $('ev-plazo-fecha').textContent = cap(new Intl.DateTimeFormat('en-GB', {weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Europe/Paris'}).format(hasta).replace(',', ' ·').replace(' at ', ' · ')) + ' (Paris time)';
+    var ids = ['ev-r-d', 'ev-r-h', 'ev-r-m', 'ev-r-s'].map($), previo = [];
+    function cerrar(){
+      sec.classList.add('is-cerrada');
+      $('ev-plazo-t').textContent = 'Registration is closed';
+      ids.forEach(function(e){ e.textContent = '00'; });
+      $('ev-plazo-btn').hidden = true;
+      var pagoBtn = $('ev-pago-btn');
+      if (pagoBtn) { pagoBtn.removeAttribute('href'); pagoBtn.setAttribute('aria-disabled', 'true'); pagoBtn.classList.add('is-cerrado'); pagoBtn.textContent = 'Registration closed'; }
+      var pago = document.getElementById('ev-pago'); if (pago) pago.classList.add('is-cerrado');
+    }
+    function tick(){
+      var ms = hasta - Date.now();
+      if (ms <= 0) { cerrar(); return false; }
+      var t = Math.floor(ms / 1000), v = [Math.floor(t / 86400), Math.floor(t % 86400 / 3600), Math.floor(t % 3600 / 60), t % 60];
+      v.forEach(function(n, i){
+        var txt = String(n).padStart(2, '0');
+        if (previo[i] !== txt) { ids[i].textContent = txt; if (previo[i] != null) { ids[i].classList.remove('is-cambia'); void ids[i].offsetWidth; ids[i].classList.add('is-cambia'); } previo[i] = txt; }
+      });
+      $('ev-reloj').setAttribute('aria-label', v[0] + ' days, ' + v[1] + ' hours and ' + v[2] + ' minutes left to register');
+      return true;
+    }
+    if (tick()) { var iv = setInterval(function(){ if (!tick()) clearInterval(iv); }, 1000); }
+  })();
+
   // ── Plazas libres en vivo: spots.json junto a la página (si no existe, se queda el valor del JSON) ──
   function pintarLibres(v){
     var nEl = $('ev-libres'), sEl = $('ev-libres-suf');
@@ -1763,11 +1830,18 @@ html:not(.cd-listo) #in-bloqueo{opacity:0;visibility:hidden}
   }
   try {
     var hoja = ev.plazasHoja || {};
-    if (hoja.id && location.protocol === 'https:' && !/claude\.ai|claudeusercontent/.test(location.hostname)) {
+    if (hoja.id && /^https?:$/.test(location.protocol) && !/claude\.ai|claudeusercontent/.test(location.hostname)) {
       fetch('https://docs.google.com/spreadsheets/d/' + encodeURIComponent(hoja.id) + '/gviz/tq?tqx=out:csv&range=' + encodeURIComponent(hoja.celda || 'A2') + (hoja.pestana ? '&sheet=' + encodeURIComponent(hoja.pestana) : ''), {cache: 'no-store'})
         .then(function(r){ return r.ok ? r.text() : Promise.reject(); })
         .then(function(t){ var v = parseInt(String(t).replace(/[^\d-]/g, ''), 10); if (isNaN(v)) return Promise.reject(); pintarLibres(Math.max(0, v)); })
         .catch(leerSpotsJson);
+      setInterval(function(){
+        if (document.hidden) return;
+        fetch('https://docs.google.com/spreadsheets/d/' + encodeURIComponent(hoja.id) + '/gviz/tq?tqx=out:csv&range=' + encodeURIComponent(hoja.celda || 'A2') + (hoja.pestana ? '&sheet=' + encodeURIComponent(hoja.pestana) : '') + '&t=' + Date.now(), {cache: 'no-store'})
+          .then(function(r){ return r.ok ? r.text() : Promise.reject(); })
+          .then(function(t){ var v = parseInt(String(t).replace(/[^\d-]/g, ''), 10); if (!isNaN(v)) pintarLibres(Math.max(0, v)); })
+          .catch(function(){});
+      }, 60000);
     } else leerSpotsJson();
   } catch(e) { try { leerSpotsJson(); } catch(_) {} }
 
