@@ -1935,20 +1935,23 @@ html:not(.cd-listo) #in-bloqueo{opacity:0;visibility:hidden}
       if (j && j.libres != null && !isNaN(+j.libres)) pintarLibres(Math.max(0, Math.round(+j.libres)));
     }, function(){});
   }
+  // Fuente 1: el Apps Script de la hoja (?accion=plazas devuelve A2, no hace falta compartir la hoja).
+  // Fuente 2: lectura pública de la hoja (gviz), si está compartida "cualquiera con el enlace".
+  function numero(t){ var v = parseInt(String(t).replace(/[^\d-]/g, ''), 10); return isNaN(v) ? Promise.reject() : Math.max(0, v); }
+  function leerHoja(){
+    var hoja = ev.plazasHoja || {}, script = (ev.contador && ev.contador.url) || '';
+    var porScript = /^https:\/\/script\.google\.com\/macros\/s\/[\w-]+\/exec$/.test(script)
+      ? function(){ return fetch(script + '?accion=plazas&t=' + Date.now(), {cache: 'no-store'}).then(function(r){ return r.ok ? r.text() : Promise.reject(); }).then(function(t){ try { var j = JSON.parse(t); return numero(j.libres); } catch(e) { return numero(t); } }); }
+      : function(){ return Promise.reject(); };
+    var porGviz = hoja.id
+      ? function(){ return fetch('https://docs.google.com/spreadsheets/d/' + encodeURIComponent(hoja.id) + '/gviz/tq?tqx=out:csv&range=' + encodeURIComponent(hoja.celda || 'A2') + (hoja.pestana ? '&sheet=' + encodeURIComponent(hoja.pestana) : '') + '&t=' + Date.now(), {cache: 'no-store'}).then(function(r){ return r.ok ? r.text() : Promise.reject(); }).then(numero); }
+      : function(){ return Promise.reject(); };
+    return porScript().catch(porGviz);
+  }
   try {
-    var hoja = ev.plazasHoja || {};
-    if (hoja.id && /^https?:$/.test(location.protocol) && !/claude\.ai|claudeusercontent/.test(location.hostname)) {
-      fetch('https://docs.google.com/spreadsheets/d/' + encodeURIComponent(hoja.id) + '/gviz/tq?tqx=out:csv&range=' + encodeURIComponent(hoja.celda || 'A2') + (hoja.pestana ? '&sheet=' + encodeURIComponent(hoja.pestana) : ''), {cache: 'no-store'})
-        .then(function(r){ return r.ok ? r.text() : Promise.reject(); })
-        .then(function(t){ var v = parseInt(String(t).replace(/[^\d-]/g, ''), 10); if (isNaN(v)) return Promise.reject(); pintarLibres(Math.max(0, v)); })
-        .catch(leerSpotsJson);
-      setInterval(function(){
-        if (document.hidden) return;
-        fetch('https://docs.google.com/spreadsheets/d/' + encodeURIComponent(hoja.id) + '/gviz/tq?tqx=out:csv&range=' + encodeURIComponent(hoja.celda || 'A2') + (hoja.pestana ? '&sheet=' + encodeURIComponent(hoja.pestana) : '') + '&t=' + Date.now(), {cache: 'no-store'})
-          .then(function(r){ return r.ok ? r.text() : Promise.reject(); })
-          .then(function(t){ var v = parseInt(String(t).replace(/[^\d-]/g, ''), 10); if (!isNaN(v)) pintarLibres(Math.max(0, v)); })
-          .catch(function(){});
-      }, 60000);
+    if (/^https?:$/.test(location.protocol) && !/claude\.ai|claudeusercontent/.test(location.hostname)) {
+      leerHoja().then(pintarLibres, leerSpotsJson);
+      setInterval(function(){ if (!document.hidden) leerHoja().then(pintarLibres, function(){}); }, 60000);
     } else leerSpotsJson();
   } catch(e) { try { leerSpotsJson(); } catch(_) {} }
 
