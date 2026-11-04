@@ -612,6 +612,31 @@ html.ev-visor-on{overflow:hidden}
 .ev-plazo.is-cerrada .ev-plazo-cab .cd-etiqueta{color:var(--brasa)}
 .cd-btn.is-cerrado{opacity:.45;pointer-events:none;cursor:default}
 @media (prefers-reduced-motion:reduce){ .ev-reloj-n.is-cambia{animation:none} }
+
+/* ═════════ Transferencia bancaria ═════════ */
+.ev-pago-acciones{display:flex;flex-wrap:wrap;gap:.7rem}
+.ev-banco{position:fixed;inset:0;z-index:calc(var(--z-nav) + 60);display:flex;align-items:center;justify-content:center;
+  padding:max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(16px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
+  background:color-mix(in srgb, var(--carbon) 82%, transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);opacity:0;transition:opacity .2s var(--ease)}
+.ev-banco.is-visible{opacity:1}
+.ev-banco-caja{position:relative;width:100%;max-width:520px;max-height:100%;overflow-y:auto;border-radius:18px;padding:clamp(1.4rem, 1rem + 2vw, 2.2rem);
+  background:var(--tizon);border:1px solid color-mix(in srgb, var(--cobre) 55%, transparent);
+  box-shadow:0 0 40px -12px color-mix(in srgb, var(--brasa) 60%, transparent), 0 30px 60px -30px #000;
+  transform:translateY(10px);transition:transform .25s var(--ease)}
+.ev-banco.is-visible .ev-banco-caja{transform:none}
+.ev-banco-x{position:absolute;top:.8rem;right:.8rem;width:40px;height:40px}
+.ev-banco-caja .cd-h3{margin-top:.5rem;padding-right:2.5rem}
+.ev-banco-datos{margin-top:1.3rem;border-top:1px solid var(--linea)}
+.ev-banco-fila{padding-block:.85rem;border-bottom:1px solid var(--linea)}
+.ev-banco-fila dt{font-size:var(--fs-label);font-weight:500;letter-spacing:var(--ls-label);text-transform:uppercase;color:var(--ceniza)}
+.ev-banco-fila dd{display:flex;align-items:center;justify-content:space-between;gap:.8rem;margin-top:.35rem}
+.ev-banco-v{font-family:var(--font);font-size:clamp(1rem, .95rem + .3vw, 1.15rem);font-weight:700;color:var(--hueso);
+  overflow-wrap:anywhere;min-width:0;user-select:all;-webkit-user-select:all}
+.ev-banco-fila dd .cd-btn{flex:none}
+.ev-banco-nota{margin-top:1.1rem;color:var(--ceniza);font-size:.9rem;line-height:1.55}
+.ev-banco-nota b{color:var(--hueso);font-weight:600}
+.ev-banco-estado{display:block;min-height:1.3em;margin-top:.6rem;font-size:.85rem;color:var(--cobre)}
+@media (prefers-reduced-motion:reduce){ .ev-banco,.ev-banco-caja{transition:none} }
 </style>
 <!-- locked -->
 <style>
@@ -674,6 +699,15 @@ html:not(.cd-listo) #in-bloqueo{opacity:0;visibility:hidden}
     "metodo": "Revolut",
     "url": "https://revolut.me/albert3sms",
     "usuario": "@albert3sms"
+  },
+  "contador": {
+    "url": "https://script.google.com/macros/s/AKfycbxZAqbagVb8R35PRi5jftgwZIPoqCuC6EBME2MKo3YZzJpxD6B9lMYl4bm2ZtwD6F_1Ug/exec"
+  },
+  "banco": {
+    "iban": "ES9415830001169073777153",
+    "nombre": "Alberto",
+    "apellidos": "Gil Cordero",
+    "bic": "REVOESM22"
   },
   "contacto": {
     "nombre": "Alberto",
@@ -1065,13 +1099,16 @@ html:not(.cd-listo) #in-bloqueo{opacity:0;visibility:hidden}
       <header class="ev-cabeza">
         <p class="cd-etiqueta cd-reveal">Confirm</p>
         <h2 class="cd-h2 cd-type" id="ev-confirmar-t">How <span class="cd-fino">to</span> confirm</h2>
-        <p class="cd-texto cd-reveal cd-d1" id="ev-confirmar-l">No form. You pay on Revolut and your spot is held.</p>
+        <p class="cd-texto cd-reveal cd-d1" id="ev-confirmar-l">No form. Pay on Revolut or by bank transfer and your spot is held.</p>
       </header>
       <div class="ev-pago cd-reveal" id="ev-pago">
         <div class="ev-pago-cuerpo">
-          <p class="cd-etiqueta">Pay on Revolut</p>
+          <p class="cd-etiqueta">Pay on Revolut or by bank transfer</p>
           <p class="ev-pago-precio cd-num"><span id="ev-pago-precio">€16</span> <span class="cd-fino">per person</span></p>
-          <a class="cd-btn" id="ev-pago-btn" href="https://revolut.me/albert3sms" target="_blank" rel="noopener">Pay €16 on Revolut</a>
+          <div class="ev-pago-acciones">
+            <a class="cd-btn" id="ev-pago-btn" href="https://revolut.me/albert3sms" target="_blank" rel="noopener">Pay €16 on Revolut</a>
+            <button type="button" class="cd-btn cd-btn--linea" id="ev-banco-abrir" aria-haspopup="dialog" aria-controls="ev-banco" hidden>Bank transfer</button>
+          </div>
           <div class="ev-pago-usuario">
             <code class="ev-pago-u" id="ev-pago-usuario">@albert3sms</code>
             <button type="button" class="cd-btn cd-btn--linea cd-btn--sm" id="ev-pago-copiar" aria-label="Copy Revolut username">Copy</button>
@@ -1110,6 +1147,17 @@ html:not(.cd-listo) #in-bloqueo{opacity:0;visibility:hidden}
     </div>
   </section>
 </main>
+
+<div class="ev-banco" id="ev-banco" role="dialog" aria-modal="true" aria-labelledby="ev-banco-t" hidden>
+  <div class="ev-banco-caja" role="document">
+    <button type="button" class="ev-visor-btn ev-banco-x" id="ev-banco-cerrar" aria-label="Close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <p class="cd-etiqueta">Bank transfer</p>
+    <h2 class="cd-h3" id="ev-banco-t">Pay <span id="ev-banco-importe">16 €</span> per person by transfer</h2>
+    <dl class="ev-banco-datos" id="ev-banco-datos"></dl>
+    <p class="ev-banco-nota">In the transfer reference, write your name and who you are paying for, for example <b>Ana López · for Ana López + Marc Dubois</b>. Transfers can take 1–2 working days to arrive.</p>
+    <span class="ev-banco-estado" id="ev-banco-estado" aria-live="polite"></span>
+  </div>
+</div>
 <!-- /event -->
 
 <footer class="cd-footer cd-gutter">
@@ -1766,6 +1814,64 @@ html:not(.cd-listo) #in-bloqueo{opacity:0;visibility:hidden}
     } catch(e) { seleccionar(); }
   });
 
+  // ── Transferencia bancaria: ventana con los datos y botones de copiar ──
+  (function(){
+    var banco = ev.banco || {}, filas = [['IBAN', banco.iban, true], ['First name', banco.nombre], ['Last name', banco.apellidos], ['BIC / SWIFT', banco.bic, true]].filter(function(f){ return f[1]; });
+    if (!banco.iban) return;
+    var modal = $('ev-banco'), abrir = $('ev-banco-abrir'), cerrarB = $('ev-banco-cerrar'), estado = $('ev-banco-estado'), dl = $('ev-banco-datos'), previoFoco = null;
+    abrir.hidden = false;
+    if (precioTxt) $('ev-banco-importe').textContent = precioTxt;
+    filas.forEach(function(f){
+      var fila = el('div', 'ev-banco-fila');
+      fila.appendChild(el('dt', null, f[0]));
+      var dd = el('dd'), v = el('code', 'ev-banco-v' + (f[2] ? ' cd-num' : ''), f[0] === 'IBAN' ? String(f[1]).replace(/\s+/g, '').replace(/(.{4})/g, '$1 ').trim() : f[1]);
+      var b = el('button', 'cd-btn cd-btn--linea cd-btn--sm', 'Copy'); b.type = 'button'; b.setAttribute('aria-label', 'Copy ' + f[0]);
+      var crudo = f[0] === 'IBAN' ? String(f[1]).replace(/\s+/g, '') : String(f[1]);
+      b.addEventListener('click', function(){
+        function sel(){ try { var r = document.createRange(); r.selectNodeContents(v); var g = getSelection(); g.removeAllRanges(); g.addRange(r); } catch(e) {} estado.textContent = f[0] + ' selected. Copy it with your keyboard.'; }
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(crudo).then(function(){ estado.textContent = f[0] + ' copied'; setTimeout(function(){ estado.textContent = ''; }, 2500); }, sel);
+          else sel();
+        } catch(e) { sel(); }
+      });
+      dd.appendChild(v); dd.appendChild(b); fila.appendChild(dd); dl.appendChild(fila);
+    });
+    function enfocables(){ return [].slice.call(modal.querySelectorAll('button, a[href]')).filter(function(e){ return !e.hidden; }); }
+    function abrirModal(){
+      previoFoco = document.activeElement; modal.hidden = false; document.documentElement.classList.add('ev-visor-on');
+      requestAnimationFrame(function(){ modal.classList.add('is-visible'); }); cerrarB.focus();
+    }
+    function cerrarModal(){
+      modal.classList.remove('is-visible'); document.documentElement.classList.remove('ev-visor-on');
+      setTimeout(function(){ modal.hidden = true; }, 200); estado.textContent = '';
+      if (previoFoco && previoFoco.focus) previoFoco.focus();
+    }
+    abrir.addEventListener('click', abrirModal);
+    cerrarB.addEventListener('click', cerrarModal);
+    modal.addEventListener('click', function(e){ if (e.target === modal) cerrarModal(); });
+    modal.addEventListener('keydown', function(e){
+      if (e.key === 'Escape') { e.preventDefault(); cerrarModal(); return; }
+      if (e.key !== 'Tab') return;
+      var f = enfocables(), a = f[0], z = f[f.length - 1];
+      if (e.shiftKey && document.activeElement === a) { e.preventDefault(); z.focus(); }
+      else if (!e.shiftKey && document.activeElement === z) { e.preventDefault(); a.focus(); }
+    });
+  })();
+
+  // ── Contador de clics en los dos botones de pago → Apps Script que suma 1 en la hoja (celda B2) ──
+  (function(){
+    var url = (ev.contador && ev.contador.url) || '';
+    if (!/^https:\/\/script\.google\.com\/macros\/s\/[\w-]+\/exec$/.test(url)) return;
+    function contar(tipo){
+      var u = url + '?tipo=' + encodeURIComponent(tipo) + '&t=' + Date.now();
+      try { if (navigator.sendBeacon && navigator.sendBeacon(u)) return; } catch(e) {}
+      try { fetch(u, {method: 'POST', mode: 'no-cors', keepalive: true}).catch(function(){}); } catch(e) {}
+    }
+    var rev = $('ev-pago-btn'), ban = $('ev-banco-abrir');
+    if (rev) rev.addEventListener('click', function(){ if (!rev.classList.contains('is-cerrado')) contar('revolut'); });
+    if (ban) ban.addEventListener('click', function(){ if (!ban.disabled) contar('banco'); });
+  })();
+
   // ── Contacto: teléfono visible y copiable (los enlaces tel: no siempre funcionan dentro del visor) ──
   var contacto = ev.contacto || {};
   if (contacto.telefono) {
@@ -1798,6 +1904,7 @@ html:not(.cd-listo) #in-bloqueo{opacity:0;visibility:hidden}
       var pagoBtn = $('ev-pago-btn');
       if (pagoBtn) { pagoBtn.removeAttribute('href'); pagoBtn.setAttribute('aria-disabled', 'true'); pagoBtn.classList.add('is-cerrado'); pagoBtn.textContent = 'Registration closed'; }
       var pago = document.getElementById('ev-pago'); if (pago) pago.classList.add('is-cerrado');
+      var bancoB = $('ev-banco-abrir'); if (bancoB) { bancoB.disabled = true; bancoB.classList.add('is-cerrado'); }
     }
     function tick(){
       var ms = hasta - Date.now();
