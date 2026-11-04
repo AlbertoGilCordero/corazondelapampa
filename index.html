@@ -637,6 +637,40 @@ html.ev-visor-on{overflow:hidden}
 .ev-banco-nota b{color:var(--hueso);font-weight:600}
 .ev-banco-estado{display:block;min-height:1.3em;margin-top:.6rem;font-size:.85rem;color:var(--cobre)}
 @media (prefers-reduced-motion:reduce){ .ev-banco,.ev-banco-caja{transition:none} }
+
+/* ═════════ Registro antes de pagar ═════════ */
+.ev-reg,.ev-paso2{width:100%;max-width:34rem;display:flex;flex-direction:column;gap:1rem}
+.ev-reg-fila{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:.9rem}
+.ev-reg-fila--pers{grid-template-columns:auto minmax(0,1fr);align-items:end}
+.ev-campo{display:flex;flex-direction:column;gap:.4rem;min-width:0}
+.ev-campo > span{font-size:var(--fs-label);font-weight:500;letter-spacing:var(--ls-label);text-transform:uppercase;color:var(--ceniza)}
+.ev-campo input{width:100%;min-height:48px;padding:.7rem .9rem;border-radius:12px;border:1px solid var(--linea-fuerte);
+  background:var(--tizon);color:var(--hueso);font:500 1rem var(--font);transition:border-color .2s, box-shadow .2s}
+.ev-campo input:focus{outline:none;border-color:var(--cobre);box-shadow:0 0 0 3px color-mix(in srgb, var(--cobre) 22%, transparent)}
+.ev-campo input:disabled{opacity:.5}
+.ev-pers{display:flex;align-items:center;gap:.4rem}
+.ev-pers input{width:4.2rem;text-align:center;font-variant-numeric:tabular-nums;-moz-appearance:textfield}
+.ev-pers input::-webkit-outer-spin-button,.ev-pers input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.ev-pers-btn{width:48px;height:48px;border-radius:12px;border:1px solid var(--linea-fuerte);background:transparent;color:var(--hueso);font:600 1.3rem var(--font);cursor:pointer}
+.ev-pers-btn:hover:not(:disabled){border-color:var(--cobre)}
+.ev-pers-btn:disabled{opacity:.35;cursor:default}
+.ev-pers-btn:focus-visible{outline:2px solid var(--cobre);outline-offset:2px}
+.ev-reg-total{justify-self:end;color:var(--ceniza);font-size:.95rem;padding-bottom:.7rem}
+.ev-reg-total b{color:var(--hueso);font-size:1.4rem;font-weight:800;margin-left:.4rem}
+.ev-reg-nota{font-size:.86rem;color:var(--ceniza);line-height:1.55}
+.ev-reg-error{min-height:1.2em;font-size:.9rem;color:var(--brasa)}
+.ev-reg-error:empty{display:none}
+.ev-reg-acciones{display:flex;flex-wrap:wrap;gap:.7rem}
+.ev-paso2-hola{font-size:1.05rem;color:var(--hueso);line-height:1.5}
+.ev-paso2-hola:focus{outline:none}
+.ev-ref--tuya{max-width:none}
+.ev-ref-linea{display:flex;flex-wrap:wrap;align-items:center;gap:.6rem;margin-top:.55rem}
+.ev-ref-codigo{font-family:var(--font);font-weight:700;color:var(--hueso);background:var(--tizon);padding:.45rem .7rem;border-radius:8px;
+  overflow-wrap:anywhere;user-select:all;-webkit-user-select:all}
+.ev-paso2-cambiar{align-self:flex-start;background:none;border:0;padding:0;color:var(--ceniza);font:500 .85rem var(--font);
+  text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.ev-paso2-cambiar:hover{color:var(--hueso)}
+@media (max-width:480px){ .ev-reg-fila{grid-template-columns:minmax(0,1fr)} .ev-reg-fila--pers{grid-template-columns:auto minmax(0,1fr)} }
 </style>
 <!-- locked -->
 <style>
@@ -691,6 +725,7 @@ html:not(.cd-listo) #in-bloqueo{opacity:0;visibility:hidden}
   "horaLlegada": "12:00",
   "plazas": 50,
   "plazasLibres": 50,
+  "maxPorRegistro": 10,
   "inscripcionHasta": "2026-11-09T09:00:00+01:00",
   "plazasHoja": {"id": "10VFl2ftaFuARQ8GejXBzcoCx7lQlPhAEbgOoMHrTnkY", "pestana": "Hoja 1", "celda": "A2"},
   "precio": 16,
@@ -1099,31 +1134,60 @@ html:not(.cd-listo) #in-bloqueo{opacity:0;visibility:hidden}
       <header class="ev-cabeza">
         <p class="cd-etiqueta cd-reveal">Confirm</p>
         <h2 class="cd-h2 cd-type" id="ev-confirmar-t">How <span class="cd-fino">to</span> confirm</h2>
-        <p class="cd-texto cd-reveal cd-d1" id="ev-confirmar-l">No form. Pay on Revolut or by bank transfer and your spot is held.</p>
+        <p class="cd-texto cd-reveal cd-d1" id="ev-confirmar-l">Two steps: tell us who is coming, then pay on Revolut or by bank transfer.</p>
       </header>
       <div class="ev-pago cd-reveal" id="ev-pago">
         <div class="ev-pago-cuerpo">
-          <p class="cd-etiqueta">Pay on Revolut or by bank transfer</p>
-          <p class="ev-pago-precio cd-num"><span id="ev-pago-precio">€16</span> <span class="cd-fino">per person</span></p>
-          <div class="ev-pago-acciones">
-            <a class="cd-btn" id="ev-pago-btn" href="https://revolut.me/albert3sms" target="_blank" rel="noopener">Pay €16 on Revolut</a>
-            <button type="button" class="cd-btn cd-btn--linea" id="ev-banco-abrir" aria-haspopup="dialog" aria-controls="ev-banco" hidden>Bank transfer</button>
-          </div>
-          <div class="ev-pago-usuario">
-            <code class="ev-pago-u" id="ev-pago-usuario">@albert3sms</code>
-            <button type="button" class="cd-btn cd-btn--linea cd-btn--sm" id="ev-pago-copiar" aria-label="Copy Revolut username">Copy</button>
-            <span class="ev-pago-estado" id="ev-pago-estado" aria-live="polite"></span>
-          </div>
-          <div class="ev-ref">
-            <p class="ev-ref-t">In the payment reference, write your name and who you are paying for.</p>
-            <p class="ev-ref-x">If it is only you, write your name or "myself". That is how we match the payment to your spot.</p>
-            <ul class="ev-ref-ej" id="ev-ref-ej">
-              <li><code>Ana López · for Ana López</code><small>Just you</small></li>
-              <li><code>Ana López · for Ana López + Marc Dubois</code><small>You and one guest</small></li>
-            </ul>
+          <p class="cd-etiqueta" id="ev-pago-etiqueta">Step 1 of 2 · Your details</p>
+          <p class="ev-pago-precio cd-num"><span id="ev-pago-precio">16 €</span> <span class="cd-fino">per person</span></p>
+
+          <form class="ev-reg" id="ev-reg" novalidate>
+            <div class="ev-reg-fila">
+              <label class="ev-campo"><span>First name</span><input id="ev-reg-nombre" name="nombre" type="text" autocomplete="given-name" maxlength="60" required></label>
+              <label class="ev-campo"><span>Last name</span><input id="ev-reg-apellidos" name="apellidos" type="text" autocomplete="family-name" maxlength="80" required></label>
+            </div>
+            <div class="ev-reg-fila ev-reg-fila--pers">
+              <div class="ev-campo">
+                <span id="ev-reg-pers-l">Number of people</span>
+                <div class="ev-pers" role="group" aria-labelledby="ev-reg-pers-l">
+                  <button type="button" class="ev-pers-btn" id="ev-reg-menos" aria-label="One person less">−</button>
+                  <input id="ev-reg-personas" name="personas" type="number" inputmode="numeric" min="1" max="10" value="1" aria-labelledby="ev-reg-pers-l">
+                  <button type="button" class="ev-pers-btn" id="ev-reg-mas" aria-label="One person more">+</button>
+                </div>
+              </div>
+              <p class="ev-reg-total">Total <b class="cd-num" id="ev-reg-total">16 €</b></p>
+            </div>
+            <p class="ev-reg-nota">Paying for friends too? Put your own name and the total number of people. We only use your name to match your payment, and delete it after the asado.</p>
+            <p class="ev-reg-error" id="ev-reg-error" role="alert"></p>
+            <div class="ev-reg-acciones">
+              <button type="submit" class="cd-btn" id="ev-reg-enviar">Continue to payment</button>
+              <button type="button" class="cd-btn cd-btn--linea" id="ev-reg-igual" hidden>Continue anyway</button>
+            </div>
+          </form>
+
+          <div class="ev-paso2" id="ev-paso2" hidden>
+            <p class="ev-paso2-hola" id="ev-paso2-hola" tabindex="-1"></p>
+            <div class="ev-ref ev-ref--tuya">
+              <p class="ev-ref-t">Write this in the payment reference</p>
+              <div class="ev-ref-linea">
+                <code class="ev-ref-codigo" id="ev-ref-codigo"></code>
+                <button type="button" class="cd-btn cd-btn--linea cd-btn--sm" id="ev-ref-copiar" aria-label="Copy payment reference">Copy</button>
+              </div>
+              <p class="ev-ref-x">That is how we match your payment to your spot.</p>
+            </div>
+            <div class="ev-pago-acciones">
+              <a class="cd-btn" id="ev-pago-btn" href="https://revolut.me/albert3sms" target="_blank" rel="noopener">Pay on Revolut</a>
+              <button type="button" class="cd-btn cd-btn--linea" id="ev-banco-abrir" aria-haspopup="dialog" aria-controls="ev-banco" hidden>Bank transfer</button>
+            </div>
+            <div class="ev-pago-usuario">
+              <code class="ev-pago-u" id="ev-pago-usuario">@albert3sms</code>
+              <button type="button" class="cd-btn cd-btn--linea cd-btn--sm" id="ev-pago-copiar" aria-label="Copy Revolut username">Copy</button>
+              <span class="ev-pago-estado" id="ev-pago-estado" aria-live="polite"></span>
+            </div>
+            <button type="button" class="ev-paso2-cambiar" id="ev-paso2-cambiar">Not you, or wrong number of people? Change details</button>
           </div>
         </div>
-        <figure class="ev-pago-qr">
+        <figure class="ev-pago-qr" id="ev-pago-qr" hidden>
           <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAYwAAAGMCAMAAAD+52V4AAAAwFBMVEXy6eEPCwkAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB+Oh6ZAAAAQHRSTlP//wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgo/+5gAAA+FJREFUeNrt3UFuIzEMRUHx/pcOkBPYbn5Ktuotg0km7sqKkNhrSZIkSZIkSZIkSZIkSZL+q0Dv/r9Pvv7u5zrtOcCAAQMGDBgwYMCAAQMGDBgwYMD48Jvf/Dld/+bdh3jac4ABAwYMGDBgwIABAwYMGDBgwIDx+mDulQ/5ZBjXNfjr+t3SzwEGDBgwYMCAAQMGDBgwYMCAAQPG3l8iAdx1iA0GDBgwYMCAAQMGDBgwYMCAAQOGQeHatHcLBgwYMGDAgAEDBgwYMGDAgAEDxl6MyQ9TgUVdiaHk1992hQEDBgwYMGDAgAEDBgwYMGDAOBijAgvZv/HrP/uWABgwYMCAAQMGDBgwYMCAAQMGjMMw1qaDYl1Dva6LlNcFAwYMGDBgwIABAwYMGDBgwIBx8MXC1bRgqwaXc3V97zYwGDBgwIABAwYMGDBgwIABAwYMGOOQK3xpc3LIuO22KwwYMGDAgAEDBgwYMGDAgAEDxhdidC2XrwcvTex60JNL5+OXKmHAgAEDBgwYMGDAgAEDBgwYMC7ASA/j1uCLGNemRfYwYMCAAQMGDBgwYMCAAQMGDBgwchiJBfddD3QdsDisEm8JgAEDBgwYMGDAgAEDBgwYMGDAuAAjMeBLLOGqm19qCAMGDBgwYMCAAQMGDBgwYMCA8aMYT4ZlkwPBEy5wxrFhwIABAwYMGDBgwIABAwYMGDAuw5i8WFjh5e9dfxDpA38wYMCAAQMGDBgwYMCAAQMGDBgwei8cVnj5+wov1l9Nl0thwIABAwYMGDBgwIABAwYMGDBg5IaGFV4EP7kcP4E0OsGFAQMGDBgwYMCAAQMGDBgwYMD4cowKL95KHCDruuiY/jkwYMCAAQMGDBgwYMCAAQMGDBgwZhbWpyeXuw7VJRaowYABAwYMGDBgwIABAwYMGDBgwOi9TFiDi91PGDjGTw7CgAEDBgwYMGDAgAEDBgwYMGBcgJEusWBr1/emB44wYMCAAQMGDBgwYMCAAQMGDBi3YVSgyUNgiYe7bfsaDBgwYMCAAQMGDBgwYMCAAQPGxRi7BoIVWLCVHlAecaIQBgwYMGDAgAEDBgwYMGDAgAHjRzEqcOEwMXSr8DL6IwaFMGDAgAEDBgwYMGDAgAEDBgwYMD7CqKZlYenfuU5YCgYDBgwYMGDAgAEDBgwYMGDAgAFjZFDYhVHh5VwwYMCAAQMGDBgwYMCAAQMGDBgw5jHW4MsX67CXINZph9hgwIABAwYMGDBgwIABAwYMGDAuwKjwoa4KHCxb4QX0MGDAgAEDBgwYMGDAgAEDBgwYMHIYkiRJkiRJkiRJkiRJkvSj/QEsF/QhrFNr/gAAAABJRU5ErkJggg==" alt="QR code that opens the Revolut payment page" width="396" height="396">
           <figcaption>Scan with your phone</figcaption>
         </figure>
@@ -1152,9 +1216,9 @@ html:not(.cd-listo) #in-bloqueo{opacity:0;visibility:hidden}
   <div class="ev-banco-caja" role="document">
     <button type="button" class="ev-visor-btn ev-banco-x" id="ev-banco-cerrar" aria-label="Close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     <p class="cd-etiqueta">Bank transfer</p>
-    <h2 class="cd-h3" id="ev-banco-t">Pay <span id="ev-banco-importe">16 €</span> per person by transfer</h2>
+    <h2 class="cd-h3" id="ev-banco-t">Pay <span id="ev-banco-importe">16 €</span> by transfer</h2>
     <dl class="ev-banco-datos" id="ev-banco-datos"></dl>
-    <p class="ev-banco-nota">In the transfer reference, write your name and who you are paying for, for example <b>Ana López · for Ana López + Marc Dubois</b>. Transfers can take 1–2 working days to arrive.</p>
+    <p class="ev-banco-nota">Write this in the transfer reference: <b id="ev-banco-ref">your full name</b>. Transfers can take 1–2 working days to arrive.</p>
     <span class="ev-banco-estado" id="ev-banco-estado" aria-live="polite"></span>
   </div>
 </div>
@@ -1769,8 +1833,8 @@ html:not(.cd-listo) #in-bloqueo{opacity:0;visibility:hidden}
 
   // ── Cómo se confirma: tres pasos reales ──
   var pasos = [
-    {cuando:'Now', titulo: precioTxt ? 'Pay ' + precioTxt + ' per person on Revolut' : 'Pay on Revolut',
-     texto:'Use the reference above: your name and who you are paying for.'},
+    {cuando:'Now', titulo:'Add your name, then pay',
+     texto:'Revolut or bank transfer, ' + (precioTxt ? precioTxt + ' per person, ' : '') + 'with the reference we give you.'},
     {cuando:'Once paid', titulo:'Your spot is held',
      texto:'The location is on the map above.', mapa: mapa},
     {cuando: ev.horaLlegada ? 'At ' + ev.horaLlegada : 'On the day', fecha: dia(ev.fecha), titulo:'Show up hungry' + (ev.horaLlegada ? ' at ' + ev.horaLlegada : ''),
@@ -1794,10 +1858,8 @@ html:not(.cd-listo) #in-bloqueo{opacity:0;visibility:hidden}
   // ── Pago: datos del JSON + copiar usuario ──
   var btn = $('ev-pago-btn'), usuario = $('ev-pago-usuario'), copiar = $('ev-pago-copiar'), estado = $('ev-pago-estado');
   if (/^https:\/\//.test(pago.url || '')) btn.href = pago.url;
-  btn.textContent = 'Pay ' + (precioTxt ? precioTxt + ' ' : '') + 'on ' + (pago.metodo || 'Revolut');
   if (precioTxt) $('ev-pago-precio').textContent = precioTxt;
   if (pago.usuario) usuario.textContent = pago.usuario;
-  if (precio) $('ev-ref-ej').children[1].querySelector('small').textContent = 'You and one guest: ' + dinero(precio * 2);
   function seleccionar(){
     try { var r = document.createRange(); r.selectNodeContents(usuario); var s = getSelection(); s.removeAllRanges(); s.addRange(r); } catch(e) {}
     estado.textContent = 'Selected. Copy it with your keyboard.';
@@ -1814,13 +1876,109 @@ html:not(.cd-listo) #in-bloqueo{opacity:0;visibility:hidden}
     } catch(e) { seleccionar(); }
   });
 
+  // ── Registro antes de pagar: nombre, apellidos y personas → hoja (Apps Script) → se muestran los datos de pago ──
+  (function(){
+    var form = $('ev-reg'), paso2 = $('ev-paso2'), qr = $('ev-pago-qr'), err = $('ev-reg-error');
+    var iNom = $('ev-reg-nombre'), iApe = $('ev-reg-apellidos'), iPer = $('ev-reg-personas'), bEnv = $('ev-reg-enviar'), bIgual = $('ev-reg-igual');
+    var api = (ev.contador && ev.contador.url) || '', CLAVE = 'cdlp-reg-' + (ev.fecha || ''), MAX = Math.max(1, +ev.maxPorRegistro || 10);
+    var maxPer = MAX, cerrado = false, fallos = 0, reg = null;
+    var enVisor = !/^https?:$/.test(location.protocol) || /claude\.ai|claudeusercontent/.test(location.hostname);
+    function guardar(r){ try { localStorage.setItem(CLAVE, JSON.stringify(r)); } catch(e) {} }
+    function leer(){ try { return JSON.parse(localStorage.getItem(CLAVE) || 'null'); } catch(e) { return null; } }
+    function borrar(){ try { localStorage.removeItem(CLAVE); } catch(e) {} }
+    function nPers(){ var n = Math.round(+iPer.value || 1); return Math.max(1, Math.min(maxPer, n)); }
+    function total(n){ return precio ? dinero(precio * n) : ''; }
+    function pintarTotal(){ $('ev-reg-total').textContent = total(nPers()) || '—'; $('ev-reg-menos').disabled = nPers() <= 1; $('ev-reg-mas').disabled = nPers() >= maxPer; }
+    $('ev-reg-menos').addEventListener('click', function(){ iPer.value = nPers() - 1; pintarTotal(); });
+    $('ev-reg-mas').addEventListener('click', function(){ iPer.value = nPers() + 1; pintarTotal(); });
+    iPer.addEventListener('input', pintarTotal); iPer.addEventListener('change', function(){ iPer.value = nPers(); pintarTotal(); });
+    pintarTotal();
+
+    function limpio(t){ return String(t || '').replace(/\s+/g, ' ').trim(); }
+    function mostrarPago(r, enfocar){
+      reg = r;
+      var personas = r.personas, ref = r.nombre + ' ' + r.apellidos + (personas > 1 ? ' · ' + personas + ' people' : '');
+      $('ev-pago-etiqueta').textContent = 'Step 2 of 2 · Payment';
+      $('ev-pago-precio').textContent = total(personas) || $('ev-pago-precio').textContent;
+      $('ev-pago-precio').nextElementSibling.textContent = personas > 1 ? 'for ' + personas + ' people' : 'for 1 person';
+      $('ev-paso2-hola').textContent = 'Thanks, ' + r.nombre + '. ' + (personas > 1 ? personas + ' spots are' : 'Your spot is') + ' noted. Now pay ' + total(personas) + ' to hold ' + (personas > 1 ? 'them' : 'it') + '.' + (r.sinGuardar ? ' (We could not save your details, so please use the reference exactly.)' : '');
+      $('ev-ref-codigo').textContent = ref;
+      $('ev-pago-btn').textContent = 'Pay ' + total(personas) + ' on Revolut';
+      var bi = $('ev-banco-importe'); if (bi) bi.textContent = total(personas);
+      var bn = $('ev-banco-ref'); if (bn) bn.textContent = ref;
+      form.hidden = true; paso2.hidden = false; qr.hidden = false;
+      if (enfocar) $('ev-paso2-hola').focus();
+    }
+    function mostrarForm(){
+      reg = null; form.hidden = false; paso2.hidden = true; qr.hidden = true; err.textContent = '';
+      $('ev-pago-etiqueta').textContent = 'Step 1 of 2 · Your details';
+      $('ev-pago-precio').textContent = precioTxt; $('ev-pago-precio').nextElementSibling.textContent = 'per person';
+    }
+    function enviar(datos){
+      if (enVisor || !/^https:\/\/script\.google\.com\/macros\/s\/[\w-]+\/exec$/.test(api)) return Promise.resolve({ok: true, id: 'preview-' + Date.now(), vista: true});
+      var ctl = window.AbortController ? new AbortController() : null, t = setTimeout(function(){ if (ctl) ctl.abort(); }, 12000);
+      return fetch(api, {method: 'POST', body: JSON.stringify(datos), signal: ctl ? ctl.signal : undefined})
+        .then(function(r){ clearTimeout(t); return r.ok ? r.json() : Promise.reject(); })
+        .then(function(j){ return j && j.ok ? j : Promise.reject(j && j.error); });
+    }
+    form.addEventListener('submit', function(e){
+      e.preventDefault(); if (cerrado) return;
+      var nombre = limpio(iNom.value), apellidos = limpio(iApe.value), personas = nPers();
+      err.textContent = '';
+      if (nombre.length < 2) { err.textContent = 'Please write your first name.'; iNom.focus(); return; }
+      if (apellidos.length < 2) { err.textContent = 'Please write your last name.'; iApe.focus(); return; }
+      if (maxPer < 1) { err.textContent = 'Sorry, there are no spots left.'; return; }
+      bEnv.disabled = true; bEnv.textContent = 'Saving…';
+      enviar({accion: 'registro', nombre: nombre, apellidos: apellidos, personas: personas, importe: precio * personas, evento: ev.fecha})
+        .then(function(j){
+          var r = {nombre: nombre, apellidos: apellidos, personas: personas, id: j.id};
+          guardar(r); mostrarPago(r, true);
+          if (j.libres != null && !isNaN(+j.libres)) pintarLibres(Math.max(0, +j.libres));
+        }, function(motivo){
+          fallos++;
+          err.textContent = motivo === 'completo' ? 'Sorry, there are not enough spots left for that many people.' : 'We could not save your details. Check your connection and try again.' + (fallos >= 2 ? ' If it keeps failing, continue and use the reference exactly, or call Alberto.' : '');
+          bIgual.hidden = fallos < 2 || motivo === 'completo';
+        })
+        .then(function(){ bEnv.disabled = cerrado; bEnv.textContent = 'Continue to payment'; });
+    });
+    bIgual.addEventListener('click', function(){
+      var r = {nombre: limpio(iNom.value), apellidos: limpio(iApe.value), personas: nPers(), id: null, sinGuardar: true};
+      if (r.nombre.length < 2 || r.apellidos.length < 2) { err.textContent = 'Please write your first and last name.'; return; }
+      mostrarPago(r, true);
+    });
+    $('ev-paso2-cambiar').addEventListener('click', function(){
+      var r = reg || leer();
+      if (r) { iNom.value = r.nombre; iApe.value = r.apellidos; iPer.value = r.personas; pintarTotal(); }
+      borrar(); mostrarForm(); iNom.focus();
+    });
+    // método elegido → se apunta en la misma fila
+    function metodo(m){
+      if (!reg || !reg.id || enVisor) return;
+      try { fetch(api, {method: 'POST', body: JSON.stringify({accion: 'metodo', id: reg.id, metodo: m}), keepalive: true}).catch(function(){}); } catch(e) {}
+    }
+    $('ev-pago-btn').addEventListener('click', function(){ metodo('Revolut'); });
+    var bb = $('ev-banco-abrir'); if (bb) bb.addEventListener('click', function(){ metodo('Bank transfer'); });
+    // copiar la referencia
+    $('ev-ref-copiar').addEventListener('click', function(){
+      var c = $('ev-ref-codigo'), t = c.textContent, est = $('ev-pago-estado');
+      function sel(){ try { var r = document.createRange(); r.selectNodeContents(c); var g = getSelection(); g.removeAllRanges(); g.addRange(r); } catch(e) {} est.textContent = 'Reference selected. Copy it with your keyboard.'; }
+      try { if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(function(){ est.textContent = 'Reference copied'; setTimeout(function(){ est.textContent = ''; }, 2500); }, sel); else sel(); } catch(e) { sel(); }
+    });
+    window.CDLP_REG = {
+      libres: function(v){ maxPer = Math.min(MAX, v); if (+iPer.value > maxPer) iPer.value = Math.max(1, maxPer); iPer.max = Math.max(1, maxPer); pintarTotal();
+        if (v <= 0 && !reg) { bEnv.disabled = true; err.textContent = 'Sold out. All spots are taken.'; } },
+      cerrar: function(msg){ cerrado = true; mostrarForm(); bEnv.disabled = true; bEnv.textContent = msg; [iNom, iApe, iPer].forEach(function(i){ i.disabled = true; }); }
+    };
+    var previo = leer();
+    if (previo && previo.nombre) mostrarPago(previo, false);
+  })();
+
   // ── Transferencia bancaria: ventana con los datos y botones de copiar ──
   (function(){
     var banco = ev.banco || {}, filas = [['IBAN', banco.iban, true], ['First name', banco.nombre], ['Last name', banco.apellidos], ['BIC / SWIFT', banco.bic, true]].filter(function(f){ return f[1]; });
     if (!banco.iban) return;
     var modal = $('ev-banco'), abrir = $('ev-banco-abrir'), cerrarB = $('ev-banco-cerrar'), estado = $('ev-banco-estado'), dl = $('ev-banco-datos'), previoFoco = null;
     abrir.hidden = false;
-    if (precioTxt) $('ev-banco-importe').textContent = precioTxt;
     filas.forEach(function(f){
       var fila = el('div', 'ev-banco-fila');
       fila.appendChild(el('dt', null, f[0]));
@@ -1905,6 +2063,7 @@ html:not(.cd-listo) #in-bloqueo{opacity:0;visibility:hidden}
       if (pagoBtn) { pagoBtn.removeAttribute('href'); pagoBtn.setAttribute('aria-disabled', 'true'); pagoBtn.classList.add('is-cerrado'); pagoBtn.textContent = 'Registration closed'; }
       var pago = document.getElementById('ev-pago'); if (pago) pago.classList.add('is-cerrado');
       var bancoB = $('ev-banco-abrir'); if (bancoB) { bancoB.disabled = true; bancoB.classList.add('is-cerrado'); }
+      if (window.CDLP_REG) window.CDLP_REG.cerrar('Registration is closed.');
     }
     function tick(){
       var ms = hasta - Date.now();
@@ -1926,6 +2085,7 @@ html:not(.cd-listo) #in-bloqueo{opacity:0;visibility:hidden}
     if (!nEl) return;
     if (v <= 0) { nEl.textContent = 'Sold out'; if (sEl) sEl.textContent = ''; }
     else { nEl.textContent = String(v); if (sEl) sEl.textContent = ' left'; }
+    if (window.CDLP_REG) window.CDLP_REG.libres(v);
   }
   pintarLibres(libres);
   // En una web propia se lee la celda directamente de Google Sheets (hoja compartida "cualquiera con el enlace");
