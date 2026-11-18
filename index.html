@@ -173,6 +173,16 @@ html.cd-listo #xm-nieve{opacity:1}
 @media (prefers-reduced-motion:reduce){ .xm-guirnalda circle{animation:none} #xm-nieve{display:none} }
 
 #ev-reg-total{white-space:nowrap}
+
+/* selector de idioma */
+.cd-nav-links li.cd-lang-li{display:flex!important}
+#cd-lang{display:flex;gap:2px;padding:3px;border:1px solid color-mix(in srgb, var(--cobre) 35%, transparent);border-radius:999px;background:color-mix(in srgb, var(--carbon) 60%, transparent)}
+#cd-lang button{appearance:none;-webkit-appearance:none;border:0;background:transparent;color:var(--ceniza);font:700 .68rem/1 'Manrope',system-ui,sans-serif;letter-spacing:.1em;padding:.5rem .6rem;border-radius:999px;cursor:pointer;transition:background .2s,color .2s}
+#cd-lang button:hover{color:var(--hueso)}
+#cd-lang button.is-on{background:var(--cobre);color:var(--carbon)}
+#cd-lang button:focus-visible{outline:2px solid var(--cobre);outline-offset:2px}
+@media (max-width:760px){ .cd-nav-links{gap:.6rem} #cd-lang button{padding:.48rem .5rem} }
+@media (max-width:560px){ .cd-nav-marca span{display:none} }
 </style>
 <!-- intro -->
 <style>
@@ -1051,6 +1061,7 @@ html:not(.cd-listo) #in-bloqueo{opacity:0;visibility:hidden}
     <ul class="cd-nav-links">
       <li><a href="#ev-programa">Programme</a></li>
       <li><a href="#ev-reglas">Rules</a></li>
+      <li class="cd-lang-li"><div id="cd-lang" role="group" aria-label="Language"><button type="button" data-lang="en" lang="en">EN</button><button type="button" data-lang="fr" lang="fr">FR</button><button type="button" data-lang="es" lang="es">ES</button></div></li>
       <li><a class="cd-btn cd-btn--linea cd-btn--sm" id="cd-nav-cta" href="#ev-pago">Confirm</a></li>
     </ul>
   </div>
@@ -2620,6 +2631,215 @@ html:not(.cd-listo) #in-bloqueo{opacity:0;visibility:hidden}
   }
   requestAnimationFrame(paso);
 })();
+</script>
+<script>
+/* ═════════ Idiomas EN · FR · ES ═════════
+   La página se pinta en inglés; aquí se traduce cada texto al idioma elegido sin recargar.
+   Un MutationObserver traduce también lo que cambia después (cuenta atrás, formulario, avisos). */
+(function(){
+  var DIC = {"A big fire, plenty of meat and people you have not met yet.": ["Un grand feu, beaucoup de viande et des gens que vous ne connaissez pas encore.", "Un gran fuego, mucha carne y gente que aún no conoces."], "A covered space close to Paris. Everyone with a spot gets the address before the night.": ["Un lieu couvert près de Paris. Chaque personne inscrite reçoit l’adresse avant la soirée.", "Un espacio cubierto cerca de París. Todos los que tengan plaza recibirán la dirección antes de la noche."], "A few things about the night are still under wraps. We reveal them here, one by one, before 5 December. Check back.": ["Quelques surprises restent encore secrètes. On les dévoile ici, une par une, avant le 5 décembre. Repassez voir.", "Algunas cosas de la noche siguen en secreto. Las desvelaremos aquí, una a una, antes del 5 de diciembre. Vuelve a echar un vistazo."], "Add them when you sign up and pay for both in one go.": ["Ajoutez-le à votre inscription et payez pour vous deux en une fois.", "Añádelo al apuntarte y paga por los dos de una vez."], "An asado that fed more people": ["Un asado qui a nourri plus de monde", "Un asado que dio de comer a más gente"], "Around the grill": ["Autour du grill", "Alrededor de la parrilla"], "Arrival": ["Arrivée", "Llegada"], "Bank transfer": ["Virement bancaire", "Transferencia bancaria"], "Bring a friend": ["Venez avec un ami", "Trae a un amigo"], "Brussels": ["Bruxelles", "Bruselas"], "Charity": ["Solidaire", "Solidario"], "Christmas edition": ["Édition de Noël", "Edición navideña"], "Christmas jumper, Santa hat, or both. Extra points for the ugliest jumper.": ["Pull de Noël, bonnet de père Noël, ou les deux. Points bonus pour le pull le plus moche.", "Jersey navideño, gorro de Papá Noel o las dos cosas. Puntos extra para el jersey más feo."], "City": ["Ville", "Ciudad"], "Come hungry": ["Venez le ventre vide", "Ven con hambre"], "Come in from the cold, grab a glass and find the grill. The fire is lit at 21:00.": ["Entrez vous réchauffer, prenez un verre et trouvez le grill. On allume le feu à 21:00.", "Entra del frío, coge una copa y busca la parrilla. El fuego se enciende a las 21:00."], "Coming up": ["Bientôt", "Próximamente"], "Coming with friends? Put your own details and count yourself plus them. Just you = 1, you and a friend = 2. We only use your details for this asado and delete them afterwards.": ["Vous venez avec des amis ? Mettez vos coordonnées et comptez-vous avec eux. Vous seul = 1, vous et un ami = 2. Vos données servent uniquement pour cet asado et sont supprimées ensuite.", "¿Vienes con amigos? Pon tus datos y cuéntate tú más ellos. Solo tú = 1, tú y un amigo = 2. Solo usamos tus datos para este asado y los borramos después."], "Confirm": ["Confirmer", "Confirmar"], "Contact": ["Contact", "Contacto"], "Continue anyway": ["Continuer quand même", "Continuar de todos modos"], "Continue to payment": ["Passer au paiement", "Ir al pago"], "Copy": ["Copier", "Copiar"], "Copied": ["Copié", "Copiado"], "DJ until 6:00": ["DJ jusqu’à 6:00", "DJ hasta las 6:00"], "Date": ["Date", "Fecha"], "Doors open, first drink": ["Ouverture des portes, premier verre", "Se abren las puertas, primera copa"], "Dress for Christmas": ["Tenue de Noël", "Vístete de Navidad"], "Email": ["E-mail", "Email"], "First cuts off the grill": ["Premières pièces du grill", "Primeros cortes de la parrilla"], "First name": ["Prénom", "Nombre"], "For small groups who want the fire to themselves. Prime cuts like ojo de bife, an à la carte menu and an asador cooking only for you, from first embers to dessert.": ["Pour les petits groupes qui veulent le feu rien que pour eux. Des pièces nobles comme l’ojo de bife, un menu à la carte et un asador qui cuisine pour vous seuls, des premières braises au dessert.", "Para grupos pequeños que quieren el fuego para ellos solos. Cortes de primera como el ojo de bife, menú a la carta y un asador que cocina solo para vosotros, de las primeras brasas al postre."], "Forty people in Brussels at €20 a ticket. €5 from every ticket paid for food for homeless people in the city, so the fire fed more than the people around it.": ["Quarante personnes à Bruxelles, à 20 € la place. 5 € de chaque place ont payé des repas pour les sans-abri de la ville : le feu a nourri bien plus que ceux qui l’entouraient.", "Cuarenta personas en Bruselas a 20 € la entrada. 5 € de cada entrada pagaron comida para personas sin hogar de la ciudad, así que el fuego alimentó a más gente que la que estaba a su alrededor."], "Gallery": ["Galerie", "Galería"], "Gather round. The first cuts are ready.": ["Approchez-vous. Les premières pièces sont prêtes.", "Acercaos. Los primeros cortes están listos."], "Join the list": ["S’inscrire", "Apuntarme"], "Join the pre-list": ["Rejoindre la pré-liste", "Apuntarme a la prelista"], "Last name": ["Nom", "Apellidos"], "Location": ["Lieu", "Lugar"], "More meat, and the music starts going up. Pace yourself, or don't.": ["Encore de la viande, et la musique monte. Gardez le rythme… ou pas.", "Más carne y la música empieza a subir. Dosifícate, o no."], "Name, email and phone. No payment yet.": ["Nom, e-mail et téléphone. Pas de paiement pour l’instant.", "Nombre, email y teléfono. Todavía no se paga."], "News": ["Actus", "Novedades"], "Next asado": ["Prochain asado", "Próximo asado"], "Not you, or wrong number of people? Change details": ["Ce n’est pas vous, ou mauvais nombre de personnes ? Modifier", "¿No eres tú o el número de personas está mal? Cambiar datos"], "Open in Google Maps": ["Ouvrir dans Google Maps", "Abrir en Google Maps"], "Our Christmas asado. A big fire, plenty of meat, beer and wine, and a DJ until 6 in the morning. The venue and a few surprises are revealed closer to the date.": ["Notre asado de Noël. Un grand feu, beaucoup de viande, de la bière et du vin, et un DJ jusqu’à 6 h du matin. Le lieu et quelques surprises seront dévoilés à l’approche de la date.", "Nuestro asado de Navidad. Un gran fuego, mucha carne, cerveza y vino, y un DJ hasta las 6 de la mañana. El lugar y algunas sorpresas se desvelarán cuando se acerque la fecha."], "Our asado for 35 in Paris. Picanha and colita de cuadril on the grill all afternoon, then brownie with salted chocolate cream and Italian meringue with red berries.": ["Notre asado pour 35 personnes à Paris. Picanha et colita de cuadril au grill tout l’après-midi, puis brownie à la crème de chocolat salé et meringue italienne aux fruits rouges.", "Nuestro asado para 35 en París. Picanha y colita de cuadril en la parrilla toda la tarde, y después brownie con crema de chocolate salado y merengue italiano con frutos rojos."], "Paris": ["Paris", "París"], "Paris area": ["Région parisienne", "Alrededores de París"], "Pay": ["Payer", "Pagar"], "Pay on Revolut": ["Payer sur Revolut", "Pagar con Revolut"], "Pay your spot": ["Payez votre place", "Paga tu plaza"], "Payment": ["Paiement", "Pago"], "Payment closed": ["Paiement clos", "Pago cerrado"], "Payment closes in": ["Le paiement ferme dans", "El pago cierra en"], "Payment is closed": ["Le paiement est clos", "El pago está cerrado"], "Payment is closed.": ["Le paiement est clos.", "El pago está cerrado."], "Payment is not open yet.": ["Le paiement n’est pas encore ouvert.", "El pago aún no está abierto."], "People, you included": ["Personnes, vous compris", "Personas, tú incluido"], "Phone": ["Téléphone", "Teléfono"], "Phones away by the fire": ["Pas de téléphone près du feu", "Móviles lejos del fuego"], "Photos are welcome. If you would rather stay out of them, just tell us.": ["Les photos sont les bienvenues. Si vous préférez ne pas y apparaître, dites-le-nous.", "Las fotos son bienvenidas. Si prefieres no salir, solo dínoslo."], "Plates down, music up. The dance floor stays open until 6:00.": ["On pose les assiettes, on monte le son. La piste reste ouverte jusqu’à 6:00.", "Platos fuera, música arriba. La pista sigue abierta hasta las 6:00."], "Please check your email.": ["Vérifiez votre e-mail.", "Revisa tu email."], "Please check your phone number.": ["Vérifiez votre numéro de téléphone.", "Revisa tu número de teléfono."], "Please write your first and last name.": ["Indiquez votre prénom et votre nom.", "Escribe tu nombre y apellidos."], "Please write your first name.": ["Indiquez votre prénom.", "Escribe tu nombre."], "Please write your last name.": ["Indiquez votre nom.", "Escribe tus apellidos."], "Please write your phone number.": ["Indiquez votre numéro de téléphone.", "Escribe tu número de teléfono."], "Pre-list": ["Pré-liste", "Prelista"], "Pre-list closes in": ["La pré-liste ferme dans", "La prelista cierra en"], "Price": ["Prix", "Precio"], "Private": ["Privé", "Privado"], "Programme": ["Programme", "Programa"], "Questions? Talk to": ["Des questions ? Parlez à", "¿Preguntas? Habla con"], "Read more": ["Lire la suite", "Leer más"], "Reference copied": ["Référence copiée", "Concepto copiado"], "Reference selected. Copy it with your keyboard.": ["Référence sélectionnée. Copiez-la avec le clavier.", "Concepto seleccionado. Cópialo con el teclado."], "Rules": ["Règles", "Normas"], "Saving…": ["Enregistrement…", "Guardando…"], "Scan with your phone": ["Scannez avec votre téléphone", "Escanéalo con el móvil"], "Second round, more chimichurri": ["Deuxième tournée, encore du chimichurri", "Segunda ronda, más chimichurri"], "Selected. Copy it with your keyboard.": ["Sélectionné. Copiez-le avec le clavier.", "Seleccionado. Cópialo con el teclado."], "Show up hungry": ["Arrivez affamés", "Llega con hambre"], "Skip dinner. There is a lot of meat.": ["Sautez le dîner. Il y a beaucoup de viande.", "No cenes antes. Hay mucha carne."], "Sold out": ["Complet", "Agotado"], "Sold out. All spots are taken.": ["Complet. Toutes les places sont prises.", "Agotado. No quedan plazas."], "Sorry, there are no spots left.": ["Désolé, il n’y a plus de place.", "Lo siento, no quedan plazas."], "Sorry, there are not enough spots left for that many people.": ["Désolé, il ne reste pas assez de places pour autant de personnes.", "Lo siento, no quedan plazas suficientes para tantas personas."], "Spots": ["Places", "Plazas"], "Stay for the music": ["Restez pour la musique", "Quédate por la música"], "Surprises on the way": ["Des surprises arrivent", "Sorpresas en camino"], "That is how we match your payment to your spot.": ["C’est comme ça qu’on relie votre paiement à votre place.", "Así relacionamos tu pago con tu plaza."], "The DJ plays until 6:00. Leave whenever you like. Most people don't.": ["Le DJ joue jusqu’à 6:00. Partez quand vous voulez. La plupart restent.", "El DJ pincha hasta las 6:00. Vete cuando quieras. Casi nadie se va."], "The DJ takes over": ["Le DJ prend le relais", "Entra el DJ"], "The asador decides": ["C’est l’asador qui décide", "Manda el asador"], "The fire": ["Le feu", "El fuego"], "The fire all to yourselves": ["Le feu rien que pour vous", "El fuego solo para vosotros"], "The fire is already going.": ["Le feu est déjà allumé.", "El fuego ya está encendido."], "The fire is already going. Come as you are.": ["Le feu est déjà allumé. Venez comme vous êtes.", "El fuego ya está encendido. Ven como quieras."], "The location is on the map above.": ["Le lieu est sur la carte ci-dessus.", "El lugar está en el mapa de arriba."], "The meat is ready when the asador says so. Not a minute before.": ["La viande est prête quand l’asador le dit. Pas une minute avant.", "La carne está lista cuando el asador lo dice. Ni un minuto antes."], "The next asado": ["Le prochain asado", "El próximo asado"], "The next asado is being planned. This page opens when there is a date.": ["Le prochain asado est en préparation. Cette page s’ouvrira quand il y aura une date.", "El próximo asado se está preparando. Esta página se abrirá cuando haya fecha."], "There are only a few. All of them apply.": ["Il y en a peu. Toutes s’appliquent.", "Son pocas. Todas cuentan."], "Thirty-five around one fire": ["Trente-cinq autour d’un feu", "Treinta y cinco alrededor de un fuego"], "This page opens when there is a date.": ["Cette page s’ouvrira quand il y aura une date.", "Esta página se abrirá cuando haya fecha."], "Venue revealed soon": ["Lieu dévoilé bientôt", "Lugar por desvelar"], "We could not save your details. Check your connection and try again.": ["Impossible d’enregistrer vos infos. Vérifiez votre connexion et réessayez.", "No pudimos guardar tus datos. Revisa tu conexión e inténtalo de nuevo."], "If it keeps failing, call Alberto.": ["Si ça ne marche toujours pas, appelez Alberto.", "Si sigue fallando, llama a Alberto."], "If it keeps failing, continue and use the reference exactly, or call Alberto.": ["Si ça ne marche toujours pas, continuez en utilisant exactement la référence, ou appelez Alberto.", "Si sigue fallando, continúa y usa el concepto tal cual, o llama a Alberto."], "We light the fire at 21:00. Come in Christmas mode. The address reaches you before the night.": ["On allume le feu à 21:00. Venez en mode Noël. L’adresse vous parviendra avant la soirée.", "Encendemos el fuego a las 21:00. Ven en modo Navidad. La dirección te llegará antes de la noche."], "We send you the address before the night.": ["On vous envoie l’adresse avant la soirée.", "Te enviamos la dirección antes de la noche."], "When the time comes, this page opens by itself.": ["Le moment venu, cette page s’ouvrira toute seule.", "Cuando llegue el momento, esta página se abrirá sola."], "Write this in the payment reference": ["Indiquez ceci en référence du paiement", "Escribe esto en el concepto del pago"], "Write this in the transfer reference:": ["Indiquez ceci en référence du virement :", "Escribe esto en el concepto de la transferencia:"], "Wrong details? Change them": ["Une erreur ? Modifiez vos infos", "¿Datos incorrectos? Cámbialos"], "You are in": ["Vous êtes inscrit", "Estás dentro"], "Your details": ["Vos coordonnées", "Tus datos"], "Your spot is held": ["Votre place est réservée", "Tu plaza está reservada"], "Once paid": ["Une fois payé", "Una vez pagado"], "On the day": ["Le jour J", "El día"], "Add your name, then pay": ["Inscrivez-vous, puis payez", "Apúntate y luego paga"], "Open asado": ["Asado ouvert", "Asado abierto"], "Asado done": ["Asado terminé", "Asado terminado"], "Photo coming soon": ["Photo bientôt", "Foto próximamente"], "by transfer": ["par virement", "por transferencia"], "days": ["jours", "días"], "hours": ["heures", "horas"], "minutes": ["minutes", "minutos"], "seconds": ["secondes", "segundos"], "is being planned.": ["est en préparation.", "se está preparando."], "is out.": ["est lancé.", "ya está aquí."], "left": ["restantes", "libres"], "opens in": ["ouvre dans", "abre en"], "per person": ["par personne", "por persona"], "your full name": ["votre nom complet", "tu nombre completo"], "Total": ["Total", "Total"], ". Transfers can take 1–2 working days to arrive.": [". Un virement peut mettre 1 à 2 jours ouvrés à arriver.", ". Las transferencias pueden tardar 1–2 días laborables en llegar."], "Close": ["Fermer", "Cerrar"], "Close viewer": ["Fermer la visionneuse", "Cerrar visor"], "Corazón de la Pampa, home": ["Corazón de la Pampa, accueil", "Corazón de la Pampa, inicio"], "Earlier fires": ["Feux précédents", "Fuegos anteriores"], "From the fire": ["Nouvelles du feu", "Noticias del fuego"], "How to confirm": ["Comment confirmer", "Cómo confirmar"], "How to join": ["Comment s’inscrire", "Cómo apuntarse"], "Next photo": ["Photo suivante", "Foto siguiente"], "Next stop": ["Étape suivante", "Siguiente parada"], "One person less": ["Une personne de moins", "Una persona menos"], "One person more": ["Une personne de plus", "Una persona más"], "Party rules": ["Règles de la fête", "Normas de la fiesta"], "Photo viewer": ["Visionneuse de photos", "Visor de fotos"], "Photos from earlier asados": ["Photos des asados précédents", "Fotos de asados anteriores"], "Previous photo": ["Photo précédente", "Foto anterior"], "Previous stop": ["Étape précédente", "Parada anterior"], "Programme stops": ["Étapes du programme", "Paradas del programa"], "QR code that opens the Revolut payment page": ["QR code qui ouvre la page de paiement Revolut", "Código QR que abre la página de pago de Revolut"], "Show a rule": ["Afficher une règle", "Mostrar una norma"], "The night": ["La nuit", "La noche"], "Language": ["Langue", "Idioma"], "Group photo at the Paris asado, October 2025": ["Photo de groupe à l’asado de Paris, octobre 2025", "Foto de grupo en el asado de París, octubre de 2025"], "Smoke rising from the grill in the garden": ["La fumée monte du grill dans le jardin", "El humo sube de la parrilla en el jardín"], "Raw cuts, sausages and two tubs of chimichurri on the table": ["Pièces crues, saucisses et deux pots de chimichurri sur la table", "Cortes crudos, chorizos y dos tarros de chimichurri en la mesa"], "Steaks on the grill in the sun": ["Steaks au grill au soleil", "Filetes en la parrilla al sol"], "Salted cuts and sausages ready for the grill": ["Pièces salées et saucisses prêtes pour le grill", "Cortes salados y chorizos listos para la parrilla"], "Two large cuts on a tray beside the grill at night": ["Deux grosses pièces sur un plateau près du grill, la nuit", "Dos cortes grandes en una bandeja junto a la parrilla, de noche"], "A forkful of meringue pie": ["Une bouchée de tarte meringuée", "Un bocado de tarta de merengue"], "A bottle of Albariño and a glass on the terrace": ["Une bouteille d’Albariño et un verre en terrasse", "Una botella de Albariño y una copa en la terraza"], "Photo from a past asado": ["Photo d’un asado précédent", "Foto de un asado anterior"], "Dessert trays laid out at the Brussels asado": ["Plateaux de desserts à l’asado de Bruxelles", "Bandejas de postres en el asado de Bruselas"], "The asador with raw cuts ready for the grill at a private asado": ["L’asador avec des pièces crues prêtes pour le grill lors d’un asado privé", "El asador con cortes crudos listos para la parrilla en un asado privado"], "Cuts and chorizos browning on the grill": ["Pièces et chorizos qui dorent sur le grill", "Cortes y chorizos dorándose en la parrilla"], "Brownie with cream and red berries": ["Brownie à la crème et aux fruits rouges", "Brownie con crema y frutos rojos"], "Lighting the charcoal at night, sparks flying": ["Allumage du charbon la nuit, les étincelles volent", "Encendiendo el carbón de noche, saltan chispas"], "Sliced meat with chimichurri in a tray": ["Viande tranchée au chimichurri dans un plateau", "Carne cortada con chimichurri en una bandeja"], "Pie topped with toasted Italian meringue": ["Tarte nappée de meringue italienne dorée", "Tarta cubierta de merengue italiano tostado"], "Turning a cut on the grill with tongs": ["On retourne une pièce sur le grill avec une pince", "Dando la vuelta a un corte en la parrilla con pinzas"]}, COPY = {"First name": ["le prénom", "el nombre"], "Last name": ["le nom", "los apellidos"], "IBAN": ["l’IBAN", "el IBAN"], "BIC / SWIFT": ["le BIC / SWIFT", "el BIC / SWIFT"], "Revolut username": ["le pseudo Revolut", "el usuario de Revolut"], "payment reference": ["la référence de paiement", "el concepto del pago"], "phone number": ["le numéro de téléphone", "el número de teléfono"]}, H = {"From the fire": ["<f>From</f> the fire", "<f>Nouvelles</f> du feu", "<f>Noticias</f> del fuego"], "Earlier fires": ["<f>Earlier</f> fires", "<f>Feux</f> précédents", "<f>Fuegos</f> anteriores"], "The night": ["<f>The</f> <m>night</m>", "<f>La</f> <m>nuit</m>", "<f>La</f> <m>noche</m>"], "The afternoon": ["<f>The</f> <m>afternoon</m>", "<f>L’</f><m>après-midi</m>", "<f>La</f> <m>tarde</m>"], "Party rules": ["<f>Party</f> rules", "Règles <f>de la fête</f>", "Normas <f>de la fiesta</f>"], "How to join": ["How <f>to</f> join", "Comment <f>s’inscrire</f>", "Cómo <f>apuntarse</f>"], "How to confirm": ["How <f>to</f> confirm", "Comment <f>confirmer</f>", "Cómo <f>confirmar</f>"]};
+  var IDX = {fr: 0, es: 1};
+  var LANGS = ['en', 'fr', 'es'];
+  var DIAS = {Monday: ['lundi', 'lunes'], Tuesday: ['mardi', 'martes'], Wednesday: ['mercredi', 'miércoles'], Thursday: ['jeudi', 'jueves'],
+              Friday: ['vendredi', 'viernes'], Saturday: ['samedi', 'sábado'], Sunday: ['dimanche', 'domingo']};
+  var MESES = {January: ['janvier', 'enero'], February: ['février', 'febrero'], March: ['mars', 'marzo'], April: ['avril', 'abril'], May: ['mai', 'mayo'],
+               June: ['juin', 'junio'], July: ['juillet', 'julio'], August: ['août', 'agosto'], September: ['septembre', 'septiembre'],
+               October: ['octobre', 'octubre'], November: ['novembre', 'noviembre'], December: ['décembre', 'diciembre']};
+  var CORTOS = {Jan: ['janv.', 'ene'], Feb: ['févr.', 'feb'], Mar: ['mars', 'mar'], Apr: ['avr.', 'abr'], Jun: ['juin', 'jun'], Jul: ['juil.', 'jul'],
+                Aug: ['août', 'ago'], Sep: ['sept.', 'sept'], Sept: ['sept.', 'sept'], Oct: ['oct.', 'oct'], Nov: ['nov.', 'nov'], Dec: ['déc.', 'dic']};
+  var UNI = {day: ['jour', 'día'], days: ['jours', 'días'], hour: ['heure', 'hora'], hours: ['heures', 'horas'],
+             minute: ['minute', 'minuto'], minutes: ['minutes', 'minutos'], second: ['seconde', 'segundo'], seconds: ['secondes', 'segundos']};
+  var lang = 'en';
+
+  function cap(s){ return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
+  function k(){ return IDX[lang]; }
+
+  // Fechas: «Saturday 5 December», «5 December», «October 2025», «25 Nov»
+  function fecha(s, minus){
+    var i = k(), cambio = false;
+    var r = s.replace(/\b(\d{1,2}) (January|February|March|April|May|June|July|August|September|October|November|December)\b/g, function(_, d, m){
+      cambio = true; return i === 1 ? d + ' de ' + MESES[m][1] : d + ' ' + MESES[m][0];
+    }).replace(/\b(January|February|March|April|May|June|July|August|September|October|November|December) (\d{4})\b/g, function(_, m, y){
+      cambio = true; return i === 1 ? MESES[m][1] + ' de ' + y : MESES[m][0] + ' ' + y;
+    }).replace(/\b(\d{1,2}) (Jan|Feb|Mar|Apr|Jun|Jul|Aug|Sept?|Oct|Nov|Dec)\b/g, function(_, d, m){
+      cambio = true; return d + ' ' + CORTOS[m][i];
+    }).replace(/\b(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)\b/g, function(_, d){
+      cambio = true; return DIAS[d][i];
+    });
+    if (!cambio) return null;
+    return (!minus && /^[A-Z]/.test(s)) ? cap(r) : r;
+  }
+  function f(s){ var r = fecha(s, true); return r == null ? s : r; }   // fecha dentro de una frase: en minúscula
+  function unidades(s){
+    var i = k();
+    return s.replace(/(\d+) (days?|hours?|minutes?|seconds?)\b/g, function(_, n, u){ return n + ' ' + UNI[u][i]; })
+            .replace(/ and /g, i === 1 ? ' y ' : ' et ');
+  }
+
+  // [regex, [fr, es]] : cada traducción es una función que recibe los grupos
+  var P = [
+    [/^Step (\d+) of (\d+)$/, [function(m){ return 'Étape ' + m[1] + ' sur ' + m[2]; }, function(m){ return 'Paso ' + m[1] + ' de ' + m[2]; }]],
+    [/^Stop (\d+) of (\d+)$/, [function(m){ return 'Étape ' + m[1] + ' sur ' + m[2]; }, function(m){ return 'Parada ' + m[1] + ' de ' + m[2]; }]],
+    [/^Photo (\d+) of (\d+): (.+)$/, [function(m){ return 'Photo ' + m[1] + ' sur ' + m[2] + ' : ' + tr(m[3]); }, function(m){ return 'Foto ' + m[1] + ' de ' + m[2] + ': ' + tr(m[3]); }]],
+    [/^for (\d+) (person|people)$/, [function(m){ return 'pour ' + m[1] + (m[1] === '1' ? ' personne' : ' personnes'); }, function(m){ return 'para ' + m[1] + (m[1] === '1' ? ' persona' : ' personas'); }]],
+    [/^Pay (.+) on Revolut$/, [function(m){ return 'Payer ' + m[1] + ' sur Revolut'; }, function(m){ return 'Pagar ' + m[1] + ' con Revolut'; }]],
+    [/^Thanks, (.+?)\. (?:Your spot is|(\d+) spots are) noted\. Now pay (.+) to hold (?:it|them)\.$/, [
+      function(m){ return 'Merci, ' + m[1] + '. ' + (m[2] ? m[2] + ' places sont notées. Payez maintenant ' + m[3] + ' pour les garder.' : 'Votre place est notée. Payez maintenant ' + m[3] + ' pour la garder.'); },
+      function(m){ return 'Gracias, ' + m[1] + '. ' + (m[2] ? m[2] + ' plazas apuntadas. Ahora paga ' + m[3] + ' para reservarlas.' : 'Tu plaza está apuntada. Ahora paga ' + m[3] + ' para reservarla.'); }]],
+    [/^You are on the pre-list, (.+?)\. (?:One spot|(\d+) spots) noted\.$/, [
+      function(m){ return 'Vous êtes sur la pré-liste, ' + m[1] + '. ' + (m[2] ? m[2] + ' places notées.' : 'Une place notée.'); },
+      function(m){ return 'Estás en la prelista, ' + m[1] + '. ' + (m[2] ? m[2] + ' plazas apuntadas.' : 'Una plaza apuntada.'); }]],
+    [/^Payment opens on (.+?) and closes at (\d\d:\d\d) on (.+?)\. We will send the payment link to (\S+)\. Spots go in order of payment\.$/, [
+      function(m){ return 'Le paiement ouvre le ' + f(m[1]) + ' et ferme à ' + m[2] + ' le ' + f(m[3]) + '. On enverra le lien de paiement à ' + m[4] + '. Les places partent dans l’ordre des paiements.'; },
+      function(m){ return 'El pago abre el ' + f(m[1]) + ' y cierra a las ' + m[2] + ' del ' + f(m[3]) + '. Te enviaremos el enlace de pago a ' + m[4] + '. Las plazas se asignan por orden de pago.'; }]],
+    [/^Join the pre-list now\. Payment opens on (.+?) and closes at (\d\d:\d\d) on (.+?)\.$/, [
+      function(m){ return 'Rejoignez la pré-liste dès maintenant. Le paiement ouvre le ' + f(m[1]) + ' et ferme à ' + m[2] + ' le ' + f(m[3]) + '.'; },
+      function(m){ return 'Apúntate ya a la prelista. El pago abre el ' + f(m[1]) + ' y cierra a las ' + m[2] + ' del ' + f(m[3]) + '.'; }]],
+    [/^Two steps: tell us who is coming, then pay on Revolut or by bank transfer before (\d\d:\d\d) on (.+?)\.$/, [
+      function(m){ return 'Deux étapes : dites-nous qui vient, puis payez sur Revolut ou par virement avant ' + m[1] + ' le ' + f(m[2]) + '.'; },
+      function(m){ return 'Dos pasos: dinos quién viene y paga con Revolut o por transferencia antes de las ' + m[1] + ' del ' + f(m[2]) + '.'; }]],
+    [/^(.+?) per person, on Revolut or by bank transfer, until (\d\d:\d\d) on (.+?)\. Spots go in order of payment\.$/, [
+      function(m){ return m[1] + ' par personne, sur Revolut ou par virement, jusqu’à ' + m[2] + ' le ' + f(m[3]) + '. Les places partent dans l’ordre des paiements.'; },
+      function(m){ return m[1] + ' por persona, con Revolut o por transferencia, hasta las ' + m[2] + ' del ' + f(m[3]) + '. Las plazas se asignan por orden de pago.'; }]],
+    [/^per person, paid (.+?) to (.+)$/, [function(m){ return 'par personne, à payer du ' + f(m[1]) + ' au ' + f(m[2]); }, function(m){ return 'por persona, a pagar del ' + f(m[1]) + ' al ' + f(m[2]); }]],
+    [/^(.+?) per person$/, [function(m){ return m[1] + ' par personne'; }, function(m){ return m[1] + ' por persona'; }]],
+    [/^(\d{1,2} \w{3,4}) to (\d{1,2} \w{3,4})$/, [function(m){ return 'Du ' + f(m[1]) + ' au ' + f(m[2]); }, function(m){ return 'Del ' + f(m[1]) + ' al ' + f(m[2]); }]],
+    [/^Now until (.+)$/, [function(m){ return 'Dès maintenant jusqu’au ' + f(m[1]); }, function(m){ return 'Desde ya hasta el ' + f(m[1]); }]],
+    [/^Until (.+)$/, [function(m){ return 'Jusqu’au ' + f(m[1]); }, function(m){ return 'Hasta el ' + f(m[1]); }]],
+    [/^(\d\d:\d\d) \(Paris time\)$/, [function(m){ return m[1] + ' (heure de Paris)'; }, function(m){ return m[1] + ' (hora de París)'; }]],
+    [/^At (\d{1,2}:\d\d)$/, [function(m){ return 'À ' + m[1]; }, function(m){ return 'A las ' + m[1]; }]],
+    [/^Fire at (.+)$/, [function(m){ return 'Feu à ' + m[1]; }, function(m){ return 'Fuego a las ' + m[1]; }]],
+    [/^Show up hungry at (.+)$/, [function(m){ return 'Arrivez affamés à ' + m[1]; }, function(m){ return 'Llega con hambre a las ' + m[1]; }]],
+    [/^Arrival at (.+?)\. Times are approximate\.$/, [function(m){ return 'Arrivée à ' + m[1] + '. Les horaires sont approximatifs.'; }, function(m){ return 'Llegada a las ' + m[1] + '. Los horarios son aproximados.'; }]],
+    [/^(.+) left to register$/, [function(m){ return 'Il reste ' + unidades(m[1]) + ' pour s’inscrire'; }, function(m){ return 'Quedan ' + unidades(m[1]) + ' para apuntarse'; }]],
+    [/^Opens in (.+)$/, [function(m){ return 'Ouvre dans ' + unidades(m[1]); }, function(m){ return 'Abre en ' + unidades(m[1]); }]],
+    [/^Copy (.+)$/, [function(m){ return 'Copier ' + (COPY[m[1]] ? COPY[m[1]][0] : tr(m[1])); }, function(m){ return 'Copiar ' + (COPY[m[1]] ? COPY[m[1]][1] : tr(m[1])); }]]
+  ];
+
+  function tr(s){
+    if (lang === 'en' || !s) return s;
+    var i = k();
+    if (DIC[s]) return DIC[s][i];
+    if (s.indexOf(' · ') > 0) return s.split(' · ').map(tr).join(' · ');
+    for (var j = 0; j < P.length; j++) { var m = P[j][0].exec(s); if (m) return P[j][1][i](m); }
+    var d = fecha(s); if (d != null) return d;
+    var frases = s.replace(/([.!?])\s+(?=[A-Z])/g, '$1\u0000').split('\u0000');
+    if (frases.length > 1) {
+      var out = frases.map(function(x){ return DIC[x] ? DIC[x][i] : x; });
+      if (out.join(' ') !== s) return out.join(' ');
+    }
+    return s;
+  }
+
+  // ── texto: guardamos el original en inglés de cada nodo para poder volver ──
+  var ORIG = new WeakMap(), PUESTO = new WeakMap();
+  function saltar(n){
+    var p = n.parentElement;
+    return !p || /^(SCRIPT|STYLE|NOSCRIPT|TEXTAREA)$/.test(p.tagName) || p.closest('.cd-type, [lang]:not(html), [data-i18n-no], #cd-lang');
+  }
+  function nodo(n){
+    if (saltar(n)) return;
+    var v = n.nodeValue;
+    if (PUESTO.get(n) !== v) ORIG.set(n, v);          // texto nuevo puesto por la página
+    var o = ORIG.get(n), t = o.trim();
+    if (!t || !/[A-Za-z]/.test(t)) return;
+    var tt = tr(t), nuevo = lang === 'en' ? o : o.replace(t, function(){ return tt; });
+    if (nuevo !== v) n.nodeValue = nuevo;
+    PUESTO.set(n, nuevo);
+  }
+  var ATTRS = ['aria-label', 'alt', 'title', 'placeholder'];
+  var AORIG = new WeakMap(), APUESTO = new WeakMap();
+  function atributos(el){
+    if (el.closest('#cd-lang, [data-i18n-no]')) return;
+    var o = AORIG.get(el) || {}, p = APUESTO.get(el) || {};
+    ATTRS.forEach(function(a){
+      if (!el.hasAttribute(a)) return;
+      var v = el.getAttribute(a);
+      if (p[a] !== v) o[a] = v;
+      var nuevo = lang === 'en' ? o[a] : tr(o[a]);
+      if (nuevo !== v) el.setAttribute(a, nuevo);
+      p[a] = nuevo;
+    });
+    AORIG.set(el, o); APUESTO.set(el, p);
+  }
+
+  // ── títulos con máquina de escribir: se rehacen con su parte fina y sus letras ──
+  function titulo(el){
+    if (el.id === 'ev-titulo') return;
+    if (lang === 'en' && !el.dataset.i18nHtml) return;   // en inglés, el título original se queda tal cual
+    if (!el.dataset.i18nKey) el.dataset.i18nKey = el.textContent.replace(/\s+/g, ' ').trim();   // letras originales en inglés
+    var t = H[el.dataset.i18nKey]; if (!t) return;
+    var html = t[lang === 'en' ? 0 : IDX[lang] + 1]
+      .replace(/<f>/g, '<span class="cd-fino">').replace(/<\/f>/g, '</span>')
+      .replace(/<m>/g, '<span id="ev-momento">').replace(/<\/m>/g, '</span>');
+    if (el.dataset.i18nHtml === html) return;
+    el.dataset.i18nHtml = html;
+    el.innerHTML = html;
+    if (el.dataset.cdType) {                      // volver a partir en letras, como hace la página
+      var n = 0;
+      (function walk(node){
+        Array.prototype.slice.call(node.childNodes).forEach(function(c){
+          if (c.nodeType === 3) {
+            var frag = document.createDocumentFragment();
+            Array.from(c.textContent).forEach(function(ch){
+              var s = document.createElement('span');
+              s.className = 'cd-ch'; s.setAttribute('aria-hidden', 'true');
+              s.textContent = ch; s.style.transitionDelay = (n++ * 26) + 'ms';
+              frag.appendChild(s);
+            });
+            c.replaceWith(frag);
+          } else if (c.nodeType === 1) walk(c);
+        });
+      })(el);
+      var caret = document.createElement('span'); caret.className = 'cd-caret'; caret.setAttribute('aria-hidden', 'true');
+      el.appendChild(caret);
+    }
+  }
+
+  function aplicar(raiz){
+    raiz = raiz || document.body;
+    if (raiz.nodeType === 3) { nodo(raiz); return; }
+    if (raiz.nodeType !== 1) return;
+    (raiz.matches && raiz.matches('.cd-type') ? [raiz] : []).concat(Array.prototype.slice.call(raiz.querySelectorAll('.cd-type'))).forEach(titulo);
+    var w = document.createTreeWalker(raiz, NodeFilter.SHOW_TEXT), n;
+    while ((n = w.nextNode())) nodo(n);
+    if (raiz.matches && raiz.matches('[aria-label],[alt],[title],[placeholder]')) atributos(raiz);
+    raiz.querySelectorAll('[aria-label],[alt],[title],[placeholder]').forEach(atributos);
+  }
+
+  var obs = new MutationObserver(function(lista){
+    lista.forEach(function(m){
+      if (m.type === 'characterData') nodo(m.target);
+      else if (m.type === 'attributes') atributos(m.target);
+      else m.addedNodes.forEach(function(x){ aplicar(x); });
+    });
+  });
+
+  function poner(l, guardar){
+    lang = LANGS.indexOf(l) >= 0 ? l : 'en';
+    document.documentElement.lang = lang;
+    if (guardar) { try { localStorage.setItem('cdlp-lang', lang); } catch(e) {} }
+    document.querySelectorAll('#cd-lang button').forEach(function(b){
+      var on = b.dataset.lang === lang; b.classList.toggle('is-on', on); b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+    aplicar(document.body);
+  }
+
+  var inicial = 'en';
+  try {
+    var q = new URLSearchParams(location.search).get('lang');
+    var g = localStorage.getItem('cdlp-lang');
+    var nav = (navigator.language || '').slice(0, 2).toLowerCase();
+    inicial = LANGS.indexOf(q) >= 0 ? q : LANGS.indexOf(g) >= 0 ? g : (nav === 'fr' || nav === 'es') ? nav : 'en';
+  } catch(e) {}
+  document.querySelectorAll('#cd-lang button').forEach(function(b){
+    b.addEventListener('click', function(){ poner(b.dataset.lang, true); });
+  });
+  poner(inicial, false);
+  obs.observe(document.body, {subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: ATTRS});
+  window.CDLP_LANG = {poner: poner, tr: tr};
+})();
+
 </script>
 </body>
 </html>
