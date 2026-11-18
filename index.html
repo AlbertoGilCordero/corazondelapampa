@@ -171,6 +171,8 @@ html[data-estado="bloqueado"] .cd-spine{display:none}
 html.cd-listo #xm-nieve{opacity:1}
 .cd-marquee i{color:#e8343c}
 @media (prefers-reduced-motion:reduce){ .xm-guirnalda circle{animation:none} #xm-nieve{display:none} }
+
+#ev-reg-total{white-space:nowrap}
 </style>
 <!-- intro -->
 <style>
@@ -981,7 +983,8 @@ html:not(.cd-listo) #in-bloqueo{opacity:0;visibility:hidden}
   ],
   "llegadaTexto": "We light the fire at 21:00. Come in Christmas mode.",
   "pagoDesde": "2026-11-25T00:00:00+01:00",
-  "pagoHasta": "2026-11-29T23:59:59+01:00"
+  "pagoHasta": "2026-11-29T23:59:59+01:00",
+  "precioMax": 40
 }
 </script>
 
@@ -1238,7 +1241,7 @@ html:not(.cd-listo) #in-bloqueo{opacity:0;visibility:hidden}
             </div>
             <div class="ev-reg-fila ev-reg-fila--pers">
               <div class="ev-campo">
-                <span id="ev-reg-pers-l">People in total, you included</span>
+                <span id="ev-reg-pers-l">People, you included</span>
                 <div class="ev-pers" role="group" aria-labelledby="ev-reg-pers-l">
                   <button type="button" class="ev-pers-btn" id="ev-reg-menos" aria-label="One person less">−</button>
                   <input id="ev-reg-personas" name="personas" type="number" inputmode="numeric" min="1" max="10" value="1" aria-labelledby="ev-reg-pers-l">
@@ -1459,6 +1462,10 @@ html:not(.cd-listo) #in-bloqueo{opacity:0;visibility:hidden}
   function largo(d){ return d ? cap(new Intl.DateTimeFormat('en-GB', {weekday: 'long', day: 'numeric', month: 'long', timeZone: 'Europe/Paris'}).format(d).replace(',', '')) : ''; }
   function corto(d){ return d ? new Intl.DateTimeFormat('en-GB', {day: 'numeric', month: 'short', timeZone: 'Europe/Paris'}).format(d) : ''; }
   var antesDePago = FASES.desde ? new Date(FASES.desde.getTime() - 1000) : null;
+  // Rango de precio mientras dura la prelista (p. ej. 30–40 €); al abrir el pago se usa ev.precio
+  var precioMax = +ev.precioMax > precio ? +ev.precioMax : 0;
+  function rango(n){ return (precio * n) + '\u2013' + dinero(precioMax * n); }
+  if (precioMax && FASE === 'prelista') precioTxt = rango(1);
   var mapa = /^https:\/\//.test(lugar.mapa || '') ? lugar.mapa : '';
 
   // ── Hero ──
@@ -2082,7 +2089,7 @@ html:not(.cd-listo) #in-bloqueo{opacity:0;visibility:hidden}
     function leer(){ try { return JSON.parse(localStorage.getItem(CLAVE) || 'null'); } catch(e) { return null; } }
     function borrar(){ try { localStorage.removeItem(CLAVE); } catch(e) {} }
     function nPers(){ var n = Math.round(+iPer.value || 1); return Math.max(1, Math.min(maxPer, n)); }
-    function total(n){ return precio ? dinero(precio * n) : ''; }
+    function total(n){ return precio ? (PRE && precioMax ? rango(n) : dinero(precio * n)) : ''; }
     function pintarTotal(){ $('ev-reg-total').textContent = total(nPers()) || '—'; $('ev-reg-menos').disabled = nPers() <= 1; $('ev-reg-mas').disabled = nPers() >= maxPer; }
     $('ev-reg-menos').addEventListener('click', function(){ iPer.value = nPers() - 1; pintarTotal(); });
     $('ev-reg-mas').addEventListener('click', function(){ iPer.value = nPers() + 1; pintarTotal(); });
