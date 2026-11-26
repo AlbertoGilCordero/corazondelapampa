@@ -2196,10 +2196,18 @@ html:not(.cd-listo) #in-bloqueo{opacity:0;visibility:hidden}
     };
     mostrarForm();
     var pre = leerPre();
-    if (PRE) { if (pre && pre.nombre) mostrarPre(pre, false); }
+    // Enlace del correo: ?nombre=…&apellidos=…&email=…&tel=…&personas=… rellena el formulario
+    var desdeCorreo = null;
+    try {
+      var qp = new URLSearchParams(location.search);
+      if (qp.get('email')) desdeCorreo = {nombre: qp.get('nombre') || '', apellidos: qp.get('apellidos') || '', email: qp.get('email') || '',
+                                         telefono: qp.get('tel') || '', personas: Math.max(1, Math.min(10, parseInt(qp.get('personas'), 10) || 1))};
+    } catch(e) {}
+    if (PRE) { if (desdeCorreo) rellenar(desdeCorreo); else if (pre && pre.nombre) mostrarPre(pre, false); }
     else {
       var previo = leer();
-      if (previo && previo.nombre) mostrarPago(previo, false);
+      if (desdeCorreo && !(previo && previo.email === desdeCorreo.email)) rellenar(desdeCorreo);   // viene del correo de pago
+      else if (previo && previo.nombre) mostrarPago(previo, false);
       else if (pre && pre.nombre) rellenar(pre);   // venía de la prelista: datos ya escritos
     }
   })();
